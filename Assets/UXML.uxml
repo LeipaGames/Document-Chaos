@@ -1,0 +1,8 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/USS.uss?fileID=7433441132597879392&amp;guid=8e44576915556cba096f651e97025992&amp;type=3#USS"/>
+    <ui:VisualElement style="width: 300px;">
+        <ui:Label text="Money: $248" class="uiField" style="background-color: rgb(255, 255, 255);"/>
+        <ui:Button text="Booster pack $100" class="uiField boosterButton" style="color: rgb(255, 255, 255); background-color: rgb(28, 114, 204);"/>
+    </ui:VisualElement>
+    <ui:VisualElement style="width: 400px; position: absolute; right: 0; bottom: 0;"/>
+</ui:UXML>
