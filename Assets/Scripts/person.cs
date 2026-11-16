@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using NUnit.Framework;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -14,6 +13,10 @@ public class person : MonoBehaviour
     public List<int> tasks = new List<int>();
     private int currentTask = 0;
     private room destinationRoom;
+
+    private bool hasBeenBusy = false;
+    private float timer = 0;
+    private float busyTime = 5;
 
     // State Variables
     public bool isWaiting = true;
@@ -34,7 +37,7 @@ public class person : MonoBehaviour
 
     void Start()
     {
-        id = Convert.ToInt32(gameObject.name[5..]);
+        id = Convert.ToInt32(gameObject.name[6..]);
         speed = speed * UnityEngine.Random.Range(0.9f, 1.1f);
 
         destinationRoom = findRoom(tasks[currentTask]);
@@ -44,6 +47,7 @@ public class person : MonoBehaviour
 
     void Update()
     {
+        timer += Time.deltaTime;
         if (destinationRoom.waitingList[0] == id) isWaiting = false;
         if (!isWaiting) {
             GoToRoom(destinationRoom.position * roomWidth, destinationRoom.floor);
@@ -56,6 +60,7 @@ public class person : MonoBehaviour
     {
         if (floor != destinationFloor) {
             destinationRoom = findRoom(Convert.ToInt32($"{floor+1}50"));
+            destinationRoom.waitingList.Add(id);
             isChangingFloors = true;
             return;
         }
@@ -87,6 +92,12 @@ public class person : MonoBehaviour
         
         // Finished
         } else {
+            transform.position = Vector3.MoveTowards(
+                transform.position,
+                new Vector2(transform.position.x, baseHeight + 0),
+                Time.deltaTime * speed/1.5f
+            );
+
             if (isChangingFloors) {
                 destinationRoom = findRoom(tasks[currentTask]);
                 transform.position = new Vector2(transform.position.x, destinationRoom.floor * 1.5f - 0.5f);
@@ -96,10 +107,15 @@ public class person : MonoBehaviour
                 return;
             }
 
+            if (!hasBeenBusy) {timer = 0f; hasBeenBusy = true;}
+            if (timer < busyTime) return; 
+
+            hasBeenBusy = false;
             currentTask += 1;
             try {
                 destinationRoom.waitingList.RemoveAt(0);
                 destinationRoom = findRoom(tasks[currentTask]);
+                destinationRoom.waitingList.Add(id);
             } catch {
                 GameObject.Destroy(gameObject);
             }
@@ -113,5 +129,4 @@ public class person : MonoBehaviour
     {
         return GameObject.Find($"Room{roomID}").GetComponent<room>();
     }
-
 }

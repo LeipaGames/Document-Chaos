@@ -12,13 +12,5 @@ public class room : MonoBehaviour
     public int position;
     public int floor;
 
-    void Start()
-    {
-        
-    }
-
-    void Update()
-    {
-        
-    }
+    // ========== ========== ========== ========== ========== Functions
 }
