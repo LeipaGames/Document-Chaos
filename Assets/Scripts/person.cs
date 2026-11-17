@@ -13,6 +13,9 @@ public class person : MonoBehaviour
     public List<int> tasks = new List<int>();
     private int currentTask = 0;
     private room destinationRoom;
+    private room waitingRoom;
+    private room stairRoom;
+    private int exitRoom = 150;
 
     private bool hasBeenBusy = false;
     private float timer = 0;
@@ -20,9 +23,11 @@ public class person : MonoBehaviour
 
     // State Variables
     public bool isWaiting = true;
-    private int floor = 0;
     private bool isChangingFloors = false;
+    private int floor = 0;
     private float impatience = 0;
+    private float waitingPosition;
+
     private float baseHeight = -0.5f;
     private float jumpPosition = 0;
 
@@ -32,6 +37,7 @@ public class person : MonoBehaviour
     private float jumpheight = 0.1f;
     private Vector3 left = new Vector3(0, 0, 0);
     private Vector3 right = new Vector3(0, 180, 0);
+    private float waitingPositionRandomness = 1;
 
     // ========== ========== ========== ========== ========== Start & Update
 
@@ -39,91 +45,142 @@ public class person : MonoBehaviour
     {
         id = Convert.ToInt32(gameObject.name[6..]);
         speed = speed * UnityEngine.Random.Range(0.9f, 1.1f);
+        //float size = UnityEngine.Random.Range(0.9f, 1.1f);
+        //transform.localScale = new Vector2(size, size);
 
         destinationRoom = findRoom(tasks[currentTask]);
-        tasks.Add(150);
+        tasks.Add(exitRoom);
         destinationRoom.waitingList.Add(id);
+
+        waitingRoom = findWaitingRoom();
+        waitingPosition = UnityEngine.Random.Range(-waitingPositionRandomness, waitingPositionRandomness);
     }
 
     void Update()
     {
         timer += Time.deltaTime;
-        if (destinationRoom.waitingList[0] == id) isWaiting = false;
-        if (!isWaiting) {
-            GoToRoom(destinationRoom.position * roomWidth, destinationRoom.floor);
+        try {
+            if (destinationRoom.waitingList[0] == id) isWaiting = false;            
+        } catch {
+            isWaiting = false;
         }
+        bool isChangingRoom = (!isWaiting || tasks[currentTask] == exitRoom) && !isChangingFloors;
+
+        if (isChangingFloors) {
+            GoToRoom(stairRoom.position* roomWidth, stairRoom.floor);
+        } else if (isWaiting) {
+            GoToRoom(waitingRoom.position * roomWidth + waitingPosition, waitingRoom.floor, false);
+        } else if (isChangingRoom) {
+            GoToRoom(destinationRoom.position * roomWidth, destinationRoom.floor);
+        } 
     }
 
     // ========== ========== ========== ========== ========== Movement
 
-    private void GoToRoom(int destination, int destinationFloor)
+    private void GoToRoom(float destination, int destinationFloor, bool isFullFillingTask = true)
     {
+        // Needs to change floor
         if (floor != destinationFloor) {
-            destinationRoom = findRoom(Convert.ToInt32($"{floor+1}50"));
-            destinationRoom.waitingList.Add(id);
-            isChangingFloors = true;
-            return;
+            ChangeFloors(); return;
         }
+        
+        // Moving
+        if (transform.position.x != destination) {
+            MoveTowardsRoom(destination);
+            AnimateWalking();
+            CorrectRotation(destination);
+        
+        // Reached room
+        } else {
+            StopAnimating();
 
-        // Rotation
+            // Changing floors
+            if (isChangingFloors) {
+                UseStairs();
+                return;
+            }
+
+            if (!isFullFillingTask) return;
+
+            // Waiting
+            if (!hasBeenBusy) {timer = 0f; hasBeenBusy = true;}
+            if (timer < busyTime || tasks[currentTask] == exitRoom) return; 
+
+            FinishTask();
+        }
+    }
+
+    // ========== ========== ========== ========== ========== Movement Functions
+
+    private void ChangeFloors() {
+        stairRoom = findRoom(Convert.ToInt32($"{floor+1}50"));
+        isChangingFloors = true;
+    }
+    private void UseStairs() {
+        //destinationRoom.waitingList.RemoveAt(0);
+        //destinationRoom = findRoom(tasks[currentTask]);
+        transform.position = new Vector2(transform.position.x, destinationRoom.floor * 1.5f - 0.5f);
+        baseHeight = transform.position.y;
+        floor = destinationRoom.floor;
+        isChangingFloors = false;
+    }
+    private void CorrectRotation(float destination) {
         if (destination > transform.position.x) {
             transform.rotation = Quaternion.Euler(right);
         } else {
             transform.rotation = Quaternion.Euler(left);
         }
-
-        // Movement
+    }
+    private void MoveTowardsRoom(float destination) {
         transform.position = Vector3.MoveTowards(
             transform.position,
             new Vector2(destination, transform.position.y),
             Time.deltaTime * speed
+        ); 
+    }
+    private void AnimateWalking() {
+        transform.position = Vector3.MoveTowards(
+            transform.position,
+            new Vector2(transform.position.x, baseHeight + jumpPosition),
+            Time.deltaTime * speed/1.5f
         );
-
-        // Jumping
-        if (transform.position.x != destination) {
+        if (math.abs(transform.position.y - (baseHeight + jumpPosition)) < 0.01f) {
+            jumpPosition = jumpPosition == jumpheight ? 0 : jumpheight;
+        }
+    }
+    private void StopAnimating() {
+        if (transform.position.y != baseHeight) {
             transform.position = Vector3.MoveTowards(
                 transform.position,
-                new Vector2(transform.position.x, baseHeight + jumpPosition),
+                new Vector2(transform.position.x, baseHeight),
                 Time.deltaTime * speed/1.5f
             );
-            if (math.abs(transform.position.y - (baseHeight + jumpPosition)) < 0.01f) {
-                jumpPosition = jumpPosition == jumpheight ? 0 : jumpheight;
-            }
-        
-        // Finished
-        } else {
-            transform.position = Vector3.MoveTowards(
-                transform.position,
-                new Vector2(transform.position.x, baseHeight + 0),
-                Time.deltaTime * speed/1.5f
-            );
-
-            if (isChangingFloors) {
-                destinationRoom = findRoom(tasks[currentTask]);
-                transform.position = new Vector2(transform.position.x, destinationRoom.floor * 1.5f - 0.5f);
-                baseHeight = transform.position.y;
-                floor = destinationRoom.floor;
-                isChangingFloors = false;
-                return;
-            }
-
-            if (!hasBeenBusy) {timer = 0f; hasBeenBusy = true;}
-            if (timer < busyTime) return; 
-
-            hasBeenBusy = false;
-            currentTask += 1;
-            try {
-                destinationRoom.waitingList.RemoveAt(0);
-                destinationRoom = findRoom(tasks[currentTask]);
-                destinationRoom.waitingList.Add(id);
-            } catch {
-                GameObject.Destroy(gameObject);
-            }
-            
+        }
+    }
+    private void FinishTask() {
+        hasBeenBusy = false;
+        currentTask += 1;
+        try {
+            destinationRoom.waitingList.RemoveAt(0);
+            destinationRoom = findRoom(tasks[currentTask]);
+            if (tasks[currentTask] == 150) return;
+            destinationRoom.waitingList.Add(id);
+            isWaiting = true;
+            waitingRoom = findWaitingRoom();
+            waitingPosition = UnityEngine.Random.Range(-waitingPositionRandomness, waitingPositionRandomness);
+        } catch {
+            GameObject.Destroy(gameObject);
         }
     }
 
     // ========== ========== ========== ========== ========== Other Functions
+
+    private room findWaitingRoom()
+    {
+        int floor = findRoom(tasks[currentTask]).floor+1;
+        int id = Convert.ToInt32($"{floor}50");
+        return findRoom(id);
+    }
 
     private room findRoom(int roomID)
     {
