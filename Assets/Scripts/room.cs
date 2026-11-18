@@ -12,5 +12,26 @@ public class room : MonoBehaviour
     public int position;
     public int floor;
 
+    private SpriteRenderer spriteRenderer;
+    public Sprite officeEmpty;
+    public Sprite officeBusy;
+
     // ========== ========== ========== ========== ========== Functions
+
+    void Start()
+    {
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        //officeEmpty = Resources.Load<Sprite>("Office Room Empty");
+        //officeBusy  = Resources.Load<Sprite>("Office Room Busy");
+    }
+
+    public void setSpriteBusy()
+    {
+        spriteRenderer.sprite = officeBusy;
+    }
+
+    public void setSpriteEmpty()
+    {
+        spriteRenderer.sprite = officeEmpty;
+    }
 }

@@ -28,7 +28,7 @@ public class person : MonoBehaviour
     private float impatience = 0;
     private float waitingPosition;
 
-    private float baseHeight = -0.5f;
+    private float baseHeight = -0.44f;
     private float jumpPosition = 0;
 
     // Permanent Variables
@@ -71,7 +71,7 @@ public class person : MonoBehaviour
         } else if (isWaiting) {
             GoToRoom(waitingRoom.position * roomWidth + waitingPosition, waitingRoom.floor, false);
         } else if (isChangingRoom) {
-            GoToRoom(destinationRoom.position * roomWidth, destinationRoom.floor);
+            GoToRoom(destinationRoom.position * roomWidth + 0.7f, destinationRoom.floor);
         } 
     }
 
@@ -103,7 +103,7 @@ public class person : MonoBehaviour
             if (!isFullFillingTask) return;
 
             // Waiting
-            if (!hasBeenBusy) {timer = 0f; hasBeenBusy = true;}
+            if (!hasBeenBusy) {timer = 0f; hasBeenBusy = true; destinationRoom.setSpriteBusy();}
             if (timer < busyTime || tasks[currentTask] == exitRoom) return; 
 
             FinishTask();
@@ -158,6 +158,7 @@ public class person : MonoBehaviour
         }
     }
     private void FinishTask() {
+        destinationRoom.setSpriteEmpty();
         hasBeenBusy = false;
         currentTask += 1;
         try {
