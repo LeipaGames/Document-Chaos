@@ -1312,7 +1312,7 @@ PrefabInstance:
       objectReference: {fileID: 21300000, guid: cfadcdf30bf8c771f801c3f62f9f4c83, type: 3}
     - target: {fileID: 283712471082724935, guid: ed7d0873461a00a08b1ff3f329d6d1d7, type: 3}
       propertyPath: m_Name
-      value: Room352
+      value: Room350
       objectReference: {fileID: 0}
     - target: {fileID: 5487305613836529828, guid: ed7d0873461a00a08b1ff3f329d6d1d7, type: 3}
       propertyPath: m_LocalScale.x
@@ -1529,7 +1529,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 283712471082724935, guid: ed7d0873461a00a08b1ff3f329d6d1d7, type: 3}
       propertyPath: m_Name
-      value: Room350
+      value: Room352
       objectReference: {fileID: 0}
     - target: {fileID: 5487305613836529828, guid: ed7d0873461a00a08b1ff3f329d6d1d7, type: 3}
       propertyPath: m_LocalScale.x

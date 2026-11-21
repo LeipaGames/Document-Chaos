@@ -39,11 +39,15 @@ public class person : MonoBehaviour
     private Vector3 right = new Vector3(0, 180, 0);
     private float waitingPositionRandomness = 1;
 
+    // References
+    private SpriteRenderer spriteRenderer;
+
     // ========== ========== ========== ========== ========== Start & Update
 
     void Start()
     {
         id = Convert.ToInt32(gameObject.name[6..]);
+        spriteRenderer = GetComponent<SpriteRenderer>();
         speed = speed * UnityEngine.Random.Range(0.9f, 1.1f);
         //float size = UnityEngine.Random.Range(0.9f, 1.1f);
         //transform.localScale = new Vector2(size, size);
@@ -96,15 +100,17 @@ public class person : MonoBehaviour
 
             // Changing floors
             if (isChangingFloors) {
-                UseStairs();
+                UseElevator();
                 return;
             }
 
             if (!isFullFillingTask) return;
 
             // Waiting
-            if (!hasBeenBusy) {timer = 0f; hasBeenBusy = true; destinationRoom.setSpriteBusy();}
-            if (timer < busyTime || tasks[currentTask] == exitRoom) return; 
+            if (!hasBeenBusy) StartTask();
+            if (tasks[currentTask] == exitRoom) {GameObject.Destroy(gameObject); return;}
+            if (timer < busyTime
+            ) return; 
 
             FinishTask();
         }
@@ -116,11 +122,11 @@ public class person : MonoBehaviour
         stairRoom = findRoom(Convert.ToInt32($"{floor+1}50"));
         isChangingFloors = true;
     }
-    private void UseStairs() {
+    private void UseElevator() {
         //destinationRoom.waitingList.RemoveAt(0);
         //destinationRoom = findRoom(tasks[currentTask]);
         transform.position = new Vector2(transform.position.x, destinationRoom.floor * 1.5f - 0.5f);
-        baseHeight = transform.position.y;
+        baseHeight = transform.position.y + 0.06f;
         floor = destinationRoom.floor;
         isChangingFloors = false;
     }
@@ -157,14 +163,21 @@ public class person : MonoBehaviour
             );
         }
     }
+    private void StartTask() {
+        spriteRenderer.enabled = false;
+        if (tasks[currentTask] != exitRoom) destinationRoom.setSpriteBusy();
+        timer = 0f;
+        hasBeenBusy = true;
+    }
     private void FinishTask() {
-        destinationRoom.setSpriteEmpty();
+        spriteRenderer.enabled = true;
+        if (tasks[currentTask] != exitRoom) destinationRoom.setSpriteEmpty();
         hasBeenBusy = false;
         currentTask += 1;
         try {
             destinationRoom.waitingList.RemoveAt(0);
             destinationRoom = findRoom(tasks[currentTask]);
-            if (tasks[currentTask] == 150) return;
+            if (tasks[currentTask] == exitRoom) return;
             destinationRoom.waitingList.Add(id);
             isWaiting = true;
             waitingRoom = findWaitingRoom();
