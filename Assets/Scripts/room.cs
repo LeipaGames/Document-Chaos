@@ -7,10 +7,12 @@ public class room : MonoBehaviour
 
     public List<int> waitingList = new List<int>();
 
-    public int type = 0; // 0: None, 1: Waiting room, 2: Office
+    public int type = 0;
     public bool isAvailable = true;
     public int position;
     public int floor;
+
+    public int[] money = {5, 7, 10, 15, 25, 50, 100};
 
     private SpriteRenderer spriteRenderer;
     public Sprite officeEmpty;
@@ -21,17 +23,26 @@ public class room : MonoBehaviour
     void Start()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
-        //officeEmpty = Resources.Load<Sprite>("Office Room Empty");
-        //officeBusy  = Resources.Load<Sprite>("Office Room Busy");
+        officeEmpty = Resources.Load<Sprite>($"Rooms/Office Room {type} Empty");
+        officeBusy  = Resources.Load<Sprite>($"Rooms/Office Room {type} Busy");
     }
 
-    public void setSpriteBusy()
+    public void SetSpriteBusy()
     {
         spriteRenderer.sprite = officeBusy;
     }
 
-    public void setSpriteEmpty()
+    public void SetSpriteEmpty()
     {
         spriteRenderer.sprite = officeEmpty;
+    }
+
+    public void SendNext()
+    {
+        try {
+            person person = GameObject.Find($"Person{waitingList[0]}").GetComponent<person>();
+            waitingList.RemoveAt(0);
+            person.FindAvailableRoom(person.tasks[person.currentTask]);
+        } catch {return;}
     }
 }
