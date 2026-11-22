@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
 
-public class person : MonoBehaviour
+public class Person : MonoBehaviour
 {
     // ========== ========== ========== ========== ========== Variables
 
@@ -12,9 +12,9 @@ public class person : MonoBehaviour
     // Tasks
     public List<int> tasks = new List<int>();
     public int currentTask = 0;
-    private room destinationRoom;
-    private room waitingRoom;
-    private room elevatorRoom;
+    private Room destinationRoom;
+    private Room waitingRoom;
+    private Room elevatorRoom;
     private int exitRoom = 10;
 
     private bool hasBeenBusy = false;
@@ -41,7 +41,7 @@ public class person : MonoBehaviour
 
     // References
     private SpriteRenderer spriteRenderer;
-    public spawner spawner;
+    public PersonSpawner spawner;
 
     // ========== ========== ========== ========== ========== Start & Update
 
@@ -183,6 +183,7 @@ public class person : MonoBehaviour
     private void FinishTask() {
         spriteRenderer.enabled = true;
         if (tasks[currentTask] != exitRoom) {
+            destinationRoom.AddMoney();
             destinationRoom.SetSpriteEmpty();
             destinationRoom.isAvailable = true;
         }
@@ -214,8 +215,8 @@ public class person : MonoBehaviour
     public void FindAvailableRoom(int floor) {;
         for (int i = 1; true; i++) {
             try {
-                room currentRoom = FindRoom(Convert.ToInt32($"{floor}{i}"));
-                if (currentRoom.isAvailable) {
+                Room currentRoom = FindRoom(Convert.ToInt32($"{floor}{i}"));
+                if (currentRoom.isAvailable && currentRoom.hasBeenBought) {
                     destinationRoom = currentRoom;
                     destinationRoom.isAvailable = false;
                     isWaiting = false;
@@ -229,15 +230,15 @@ public class person : MonoBehaviour
         }
     }
 
-    private room FindWaitingRoom()
+    private Room FindWaitingRoom()
     {
         int floor = tasks[currentTask];
         int id = Convert.ToInt32($"{floor}0");
         return FindRoom(id);
     }
 
-    private room FindRoom(int roomID)
+    private Room FindRoom(int roomID)
     {
-        return GameObject.Find($"Room{roomID}").GetComponent<room>();
+        return GameObject.Find($"Room{roomID}").GetComponent<Room>();
     }
 }
