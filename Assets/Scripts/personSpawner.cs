@@ -78,6 +78,6 @@ public class PersonSpawner : MonoBehaviour
 
     public void RecalculateSpawnRate()
     {
-        spawnRate = 15/roomCount;
+        spawnRate = 12/roomCount;
     }
 }

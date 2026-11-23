@@ -32,7 +32,7 @@ public class Person : MonoBehaviour
     private float jumpPosition = 0;
 
     // Permanent Variables
-    private float speed = 1.5f;
+    private float speed = 2f;
     private int roomWidth = 3;
     private float jumpheight = 0.1f;
     private Vector3 left = new Vector3(0, 0, 0);

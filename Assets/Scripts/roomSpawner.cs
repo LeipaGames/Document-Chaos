@@ -34,7 +34,7 @@ public class RoomSpawner : MonoBehaviour
         if (type == 1) {
             newRoom.price = (newRoom.money[floor-1] * 10) + ((position-2) * newRoom.money[floor-1] * 5);
         } else if (type == 2) {
-            newRoom.price = (newRoom.money[floor-1] * 10) + (newRoom.money[floor-1] * 5);
+            newRoom.price = newRoom.money[floor-1] * 10;
         }
        
     }
