@@ -7,9 +7,9 @@ Hra Document Chaos je hra typu Tycoon, odehrávající se v rušném úřadu. Do
 * **ESC** - Ukončení hry
 
 ## Postup spuštění (Windows)
-1. (dodělat).
-2. Rozbalte stažený zip soubor.
-3. Spusťte soubor Document Chaos.exe
+1. Stáhněte ze sekce Releases `Document.Chaos.zip`.
+2. Rozbalte stažený `.zip` soubor.
+3. Spusťte soubor `Document Chaos.exe`
 
 ## Použité technologie
 * **Herní engine:** Unity
